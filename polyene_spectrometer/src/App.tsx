@@ -1,8 +1,8 @@
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 // Interactive Conjugated Alkene Spectrometer
 // Single-file React app. Uses SVG for both the molecule view and the UV-Vis spectrum.
-// Tailwind classes are used for styling. No external charting deps.
+// Tailwind is loaded via CDN in index.html.
 
 // --- Helper math ---
 function gaussian(x: number, mu: number, sigma: number) {
@@ -25,25 +25,15 @@ function wavelengthToRGB(wavelength: number) {
   const w = wavelength;
   let r = 0, g = 0, b = 0;
   if (w >= 380 && w < 440) {
-    r = -(w - 440) / (440 - 380);
-    g = 0;
-    b = 1;
+    r = -(w - 440) / (440 - 380); g = 0; b = 1;
   } else if (w >= 440 && w < 490) {
-    r = 0;
-    g = (w - 440) / (490 - 440);
-    b = 1;
+    r = 0; g = (w - 440) / (490 - 440); b = 1;
   } else if (w >= 490 && w < 510) {
-    r = 0;
-    g = 1;
-    b = -(w - 510) / (510 - 490);
+    r = 0; g = 1; b = -(w - 510) / (510 - 490);
   } else if (w >= 510 && w < 580) {
-    r = (w - 510) / (580 - 510);
-    g = 1;
-    b = 0;
+    r = (w - 510) / (580 - 510); g = 1; b = 0;
   } else if (w >= 580 && w < 645) {
-    r = 1;
-    g = -(w - 645) / (645 - 580);
-    b = 0;
+    r = 1; g = -(w - 645) / (645 - 580); b = 0;
   } else if (w >= 645 && w <= 740) {
     r = 1; g = 0; b = 0;
   }
@@ -51,7 +41,8 @@ function wavelengthToRGB(wavelength: number) {
   const factor = (w < 420) ? 0.3 + 0.7 * (w - 380) / (420 - 380)
                 : (w > 700) ? 0.3 + 0.7 * (740 - w) / (740 - 700)
                 : 1.0;
-  const to255 = (v: number) => Math.round(255 * Math.pow(Math.max(0, Math.min(1, v * factor)), gamma));
+  const to255 = (v: number) =>
+    Math.round(255 * Math.pow(Math.max(0, Math.min(1, v * factor)), gamma));
   return `rgb(${to255(r)}, ${to255(g)}, ${to255(b)})`;
 }
 
@@ -90,21 +81,12 @@ function HomoLumoPanel({ lambda }: { lambda: number }) {
   yLUMO = Math.max(boxY + topPad, yLUMO);
   yHOMO = Math.min(boxY + innerH - botPad, yHOMO);
 
-  // Label box width must be declared before it’s used
   const labelRectW = 160;
-
-  // Axis & arrow
   const axisX = Math.max(boxX + 14, x1 - 12);
   const xArrow = (x1 + x2) / 2; // arrow centered over the level ticks
-
-  // Label immediately right of the arrow; clamp inside box
   const labelRectX = Math.min(boxX + innerW - 8 - labelRectW, xArrow + 8);
   const labelCenterX = labelRectX + labelRectW / 2;
-
-  // Panel border width hugs the label, but never exceeds available width
   const borderW = Math.min(innerW, Math.max(260, labelRectX + labelRectW + 16 - boxX));
-
-  // Keep Energy label left of the axis and safely inside
   const energyLabelX = Math.max(boxX + 10, axisX - 12);
 
   return (
@@ -291,54 +273,68 @@ function SpectrumChart({ n }: { n: number }) {
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
-// APP
+// APP — single-column article with inline tools
 // ──────────────────────────────────────────────────────────────────────────────
 export default function App() {
   const [n, setN] = useState(4); // number of conjugated double bonds
   const lambdaMax = useMemo(() => lambdaMaxFromN(n), [n]);
-  const color = wavelengthToRGB(lambdaMax);
 
   return (
-    <>
-      <div className="min-h-screen w-full bg-slate-50 text-slate-900">
-        <div className="max-w-5xl mx-auto px-4 py-8">
-          <div className="mb-6 flex items-center justify-between">
-            <h1 className="text-2xl font-bold tracking-tight">Interactive Conjugated Alkene Spectrometer</h1>
-            <div className="flex items-center gap-3">
-              <div className="text-sm">n = <span className="font-semibold">{n}</span></div>
-              <div className="w-8 h-4 rounded border border-slate-300" style={{ background: color }} title={`Approx. perceived color at λmax (${Math.round(lambdaMax)} nm)`} />
-            </div>
-          </div>
+    <div className="min-h-screen w-full bg-slate-50 text-slate-900">
+      <main className="mx-auto max-w-3xl px-4 py-10 space-y-6">
+        {/* Title + byline */}
+        <header className="space-y-1">
+          <h1 className="text-3xl font-bold tracking-tight">Interactive Conjugated Alkene Spectrometer</h1>
+          <p className="text-sm text-slate-600">By Nathan</p>
+        </header>
 
-          {/* Molecule visualization */}
-          <div className="rounded-2xl bg-white shadow p-4 mb-4">
-            <div className="flex items-center justify-between mb-1">
-              <div className="text-sm font-medium">Minimalist polyene (2n carbons)</div>
-              <div className="text-xs text-slate-500">Double bonds shown as parallel lines</div>
-            </div>
-            <MoleculeView n={n} />
-            <div className="mt-3">
-              <label htmlFor="nSlider" className="block text-sm font-medium mb-1">Conjugation (n)</label>
-              <input id="nSlider" type="range" min={1} max={12} step={1} value={n} onChange={(e) => setN(parseInt(e.target.value))} className="w-full accent-blue-500" />
-              <div className="flex justify-between text-xs text-slate-500"><span>1</span><span>12</span></div>
-            </div>
-          </div>
+        {/* Intro text */}
+        <section className="space-y-4 leading-relaxed">
+          <p>Your phone screen lights up, but a grocery bag doesn't. Both are plastics!</p>
+          <p>
+            Increasing the length of the conjugated π-system lowers the HOMO–LUMO gap,
+            shifting λ<sub>max</sub> to longer wavelength (lower energy).
+          </p>
+        </section>
 
-          {/* Spectrum */}
-          <div className="rounded-2xl bg-white shadow p-4">
-            <div className="flex items-center justify-between mb-2">
-              <div className="text-sm font-medium">Simulated UV–Vis absorption</div>
-              <div className="text-xs text-slate-500">Bathochromic (red) shift as n increases</div>
-            </div>
-            <HomoLumoPanel lambda={lambdaMax} />
-            <SpectrumChart n={n} />
+        {/* Molecule tool inline */}
+        <section className="rounded-2xl bg-white shadow p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-medium">Minimalist polyene (2n carbons)</h2>
+            <span className="text-xs text-slate-500">Double bonds shown as parallel lines</span>
           </div>
+          <MoleculeView n={n} />
+          <div>
+            <label htmlFor="nSlider" className="block text-sm font-medium mb-1">Conjugation (n)</label>
+            <input
+              id="nSlider"
+              type="range"
+              min={1}
+              max={12}
+              step={1}
+              value={n}
+              onChange={(e) => setN(parseInt(e.target.value))}
+              className="w-full accent-blue-500"
+            />
+            <div className="flex justify-between text-xs text-slate-500"><span>1</span><span>12</span></div>
+          </div>
+        </section>
 
-          <div className="mt-6 text-sm text-slate-700">
-            Increasing the length of the conjugated π-system lowers the HOMO–LUMO gap, shifting λmax to longer wavelength (lower energy).
+        {/* Spectrum tool inline */}
+        <section className="rounded-2xl bg-white shadow p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-medium">Simulated UV–Vis absorption</h2>
+            <span className="text-xs text-slate-500">Bathochromic (red) shift as n increases</span>
           </div>
-        </div>
-      </div>
+          <HomoLumoPanel lambda={lambdaMax} />
+          <SpectrumChart n={n} />
+        </section>
+
+        {/* Closing line */}
+        <p className="text-sm text-slate-700">
+          The growing π-conjugation narrows the HOMO–LUMO gap, decreasing transition energy and shifting absorption into the visible — linking structure to color.
+        </p>
+      </main>
 
       {/* Minimal runtime checks in console (sanity tests) */}
       <script suppressHydrationWarning>{`
@@ -353,6 +349,6 @@ export default function App() {
           } catch (e) {}
         })();
       `}</script>
-    </>
+    </div>
   );
 }
