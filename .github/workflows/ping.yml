@@ -1,0 +1,8 @@
+name: ping
+on:
+  workflow_dispatch:   # shows the "Run workflow" button
+jobs:
+  say-hi:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "hi"
