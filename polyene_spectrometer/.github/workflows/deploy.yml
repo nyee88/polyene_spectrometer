@@ -1,37 +1,8 @@
-name: Deploy to GitHub Pages
-
+name: deploy
 on:
-  push:
-    branches: [ main ]     # change to master if your branch is master
-  workflow_dispatch:        # lets you run it manually
-
-permissions:
-  contents: write
-
+  workflow_dispatch:    # manual only, no branch dependency
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
-
-      - name: Install deps
-        run: npm ci || npm install
-
-      - name: Build
-        run: npm run build
-
-      - name: Publish to gh-pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
-          force_orphan: true
+      - run: echo "This would deploy"
