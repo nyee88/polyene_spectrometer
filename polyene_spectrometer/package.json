@@ -6,10 +6,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
-    "lint": "eslint .",
-    "preview": "vite preview",
-    "deploy": "gh-pages -d dist"
+    "build": "vite build",
+    "typecheck": "tsc -b",
+    "preview": "vite preview"
   },
   "dependencies": {
     "react": "^19.1.1",
