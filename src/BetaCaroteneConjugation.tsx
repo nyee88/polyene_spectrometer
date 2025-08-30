@@ -7,11 +7,14 @@ import React, { useEffect, useMemo, useState } from "react";
  * - Renders **β-carotene** directly from the embedded Molfile (V2000).
  * - Click a **double bond** to toggle highlight.
  * - A **single** bond between two highlighted doubles also highlights.
- * - When all **11** doubles are selected → small victory animation.
+ * - When all **11** doubles are selected → bonds-only POP effect (no box glow).
+ * - Confetti/party animation **removed**.
  *
- * Usage in your app:
- *   import BetaCaroteneConjugation from "./BetaCaroteneConjugation";
- *   export default function App() { return <BetaCaroteneConjugation/> }
+ * New (safe, first-try) upgrades:
+ *   • Reset & Undo (incl. Ctrl/Cmd+Z)
+ *   • Keyboard/ARIA access for toggling double bonds
+ *   • Color-blind cue: dashed stroke for connecting singles
+ *   • Minor tests/invariants
  */
 
 // ===================== Embedded β-carotene (V2000 Molfile) =====================
@@ -154,7 +157,9 @@ export default function BetaCaroteneConjugation() {
   const [edges, setEdges] = useState<Edge[]>([]);
   const [doubleIds, setDoubleIds] = useState<number[]>([]);
   const [selected, setSelected] = useState<Set<number>>(new Set());
-  const width = 980, height = 340; const BASE = "#374151", HILITE = "#ef4444";
+  const [history, setHistory] = useState<number[][]>([]); // for Undo
+  const [popActive, setPopActive] = useState(false);
+  const width = 980, height = 340; const BASE = "#374151", HILITE = "#f59e0b"; // carotene orange
 
   useEffect(() => {
     const { atoms, bonds } = parseMolV2000(BETA_CAROTENE_MOL);
@@ -164,13 +169,62 @@ export default function BetaCaroteneConjugation() {
       return { id: i, a: b.a, b: b.b, order: b.order, ax: A.x, ay: A.y, bx: B.x, by: B.y };
     });
     const doubles = eds.filter(e => e.order === 2).map(e => e.id);
-    setEdges(eds); setDoubleIds(doubles); setSelected(new Set());
+    setEdges(eds); setDoubleIds(doubles); setSelected(new Set()); setHistory([]);
   }, []);
 
-  const victory = useMemo(() => selected.size === 11 && doubleIds.length === 11, [selected, doubleIds]);
+  const expectedDoubles = doubleIds.length; // keep tests assuming 11
+  const victory = useMemo(() => selected.size === expectedDoubles && expectedDoubles === 11, [selected, expectedDoubles]);
+
+  // Trigger a temporary POP animation when victory occurs
+  useEffect(() => {
+    if (!victory) return;
+    setPopActive(true);
+    const t = setTimeout(() => setPopActive(false), 700);
+    return () => clearTimeout(t);
+  }, [victory]);
+
+  // Keyboard: Undo via Ctrl/Cmd+Z
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const isUndo = (e.ctrlKey || e.metaKey) && (e.key === "z" || e.key === "Z");
+      if (isUndo) { e.preventDefault(); undo(); }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [history]);
+
+  function pushHistory(prev: Set<number>) {
+    setHistory(h => {
+      const snap = Array.from(prev);
+      const next = h.length > 100 ? h.slice(-100) : h; // cap history
+      return [...next, snap];
+    });
+  }
 
   function toggleDouble(id: number) {
-    setSelected(prev => { const next = new Set(prev); next.has(id) ? next.delete(id) : next.add(id); return next; });
+    setSelected(prev => {
+      pushHistory(prev);
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  }
+
+  function resetSelection() {
+    setSelected(prev => {
+      if (prev.size === 0) return prev;
+      pushHistory(prev);
+      return new Set();
+    });
+  }
+
+  function undo() {
+    setHistory(h => {
+      if (h.length === 0) return h;
+      const last = h[h.length - 1];
+      setSelected(new Set(last));
+      return h.slice(0, -1);
+    });
   }
 
   function singleHighlighted(e: Edge): boolean {
@@ -189,43 +243,71 @@ export default function BetaCaroteneConjugation() {
     ];
   }
 
-  // simple runtime sanity
-  useEffect(() => { if (doubleIds.length) console.assert(doubleIds.length === 11, "Expect 11 C=C"); }, [doubleIds]);
+  // ---- Inline tests / invariants ----
+  useEffect(() => {
+    if (doubleIds.length) {
+      console.assert(doubleIds.length === 11, "[TEST] Expect 11 C=C");
+      for (const id of selected) {
+        console.assert(doubleIds.includes(id), "[TEST] selection contains only double bonds");
+      }
+      console.assert(selected.size <= doubleIds.length, "[TEST] selection size valid");
+    }
+  }, [doubleIds, selected]);
+
+  const handleKeyToggle = (e: React.KeyboardEvent<SVGLineElement>, id: number) => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleDouble(id); }
+  };
 
   return (
     <div style={{ width: "100%", maxWidth: 980, margin: "0 auto" }}>
-      <style>{`@keyframes glowPulse{0%{filter:drop-shadow(0 0 0 rgba(239,68,68,0))}50%{filter:drop-shadow(0 0 12px rgba(239,68,68,.85))}100%{filter:drop-shadow(0 0 0 rgba(239,68,68,0))}} .victory{animation:glowPulse 1.2s ease-in-out 0s 6}`}</style>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-        <h2 style={{ fontWeight: 600 }}>β‑Carotene — Conjugation Explorer</h2>
-        <div style={{ fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontSize: 12 }}>selected: {selected.size}/11</div>
+      <style>{`
+        @keyframes popBond{0%{stroke-width:2.2}45%{stroke-width:4.6}100%{stroke-width:2.2}}
+        .popBond{animation:popBond 700ms ease-out both}
+      `}</style>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8, gap: 8 }}>
+        <h2 style={{ fontWeight: 600, margin: 0 }}>β‑Carotene — Conjugation Explorer</h2>
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <div style={{ fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontSize: 12 }}>selected: {selected.size}/{expectedDoubles}</div>
+          <button onClick={undo} disabled={history.length === 0} style={{ padding: "4px 8px", borderRadius: 6, border: "1px solid #d1d5db", background: history.length?"#fff":"#f3f4f6", cursor: history.length?"pointer":"not-allowed" }}>Undo</button>
+          <button onClick={resetSelection} style={{ padding: "4px 8px", borderRadius: 6, border: "1px solid #d1d5db", background: "#fff", cursor: "pointer" }}>Reset</button>
+        </div>
       </div>
 
-      <svg viewBox={`0 0 ${width} ${height}`} className={victory?"victory":""} style={{ width: "100%", height: "auto", background: "#fff", borderRadius: 12, boxShadow: "0 1px 6px rgba(0,0,0,.08)" }} role="img">
+      <svg viewBox={`0 0 ${width} ${height}`} style={{ width: "100%,", height: "auto", background: "#fff", borderRadius: 12, boxShadow: "0 1px 6px rgba(0,0,0,.08)" }} role="img" aria-label="Beta carotene conjugation explorer">
         <rect x={0} y={0} width={width} height={height} fill="#ffffff" rx={12} />
         <g strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2}>
           {edges.map((e) => {
-            const stroke = e.order === 2 ? (selected.has(e.id) ? HILITE : BASE) : (singleHighlighted(e) ? HILITE : BASE);
-            if (e.order === 2) {
+            const isDouble = e.order === 2;
+            const isActive = isDouble ? selected.has(e.id) : singleHighlighted(e);
+            const stroke = isActive ? HILITE : BASE;
+            const popClass = popActive && isActive ? 'popBond' : undefined;
+            const dash = !isDouble && isActive ? "6 3" : undefined; // color-blind cue
+            if (isDouble) {
               const [L1, L2] = dblLines(e, 3);
+              const aria = `Double bond ${e.id}${selected.has(e.id) ? ' selected' : ''}`;
               return (
                 <g key={`d${e.id}`}>
-                  <line {...L1} stroke={stroke} />
-                  <line {...L2} stroke={stroke} />
-                  <line x1={e.ax} y1={e.ay} x2={e.bx} y2={e.by} stroke="transparent" strokeWidth={14} onClick={() => toggleDouble(e.id)} style={{ cursor: "pointer" }} />
+                  <line {...L1} stroke={stroke} className={popClass} />
+                  <line {...L2} stroke={stroke} className={popClass} />
+                  <line
+                    x1={e.ax} y1={e.ay} x2={e.bx} y2={e.by}
+                    stroke="transparent" strokeWidth={14}
+                    onClick={() => toggleDouble(e.id)}
+                    onKeyDown={(evt) => handleKeyToggle(evt, e.id)}
+                    tabIndex={0} role="button" aria-label={aria}
+                    style={{ cursor: "pointer" }}
+                  />
                 </g>
               );
             }
-            return <line key={`s${e.id}`} x1={e.ax} y1={e.ay} x2={e.bx} y2={e.by} stroke={stroke} />;
+            return <line key={`s${e.id}`} x1={e.ax} y1={e.ay} x2={e.bx} y2={e.by} stroke={stroke} className={popClass} strokeDasharray={dash} />;
           })}
         </g>
 
         {victory && (
-          <g>
-            <text x={width/2} y={28} textAnchor="middle" fontSize={16} fill={HILITE} fontWeight={700}>Full conjugated path revealed!</text>
-            {Array.from({ length: 36 }, (_, i) => (
-              <circle key={`k${i}`} cx={20 + Math.random() * (width - 40)} cy={24 + Math.random() * (height - 60)} r={Math.random() * 2 + 1} fill={i % 2 ? HILITE : "#10b981"} opacity={0.8} />
-            ))}
-          </g>
+          <text x={width/2} y={28} textAnchor="middle" fontSize={16} fill={HILITE} fontWeight={700}>
+            Conjugated chain complete
+          </text>
         )}
       </svg>
     </div>
