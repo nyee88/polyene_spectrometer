@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import BetaCaroteneConjugation from "./BetaCaroteneConjugation"; // <-- exact casing
 
 // Interactive Conjugated Alkene Spectrometer
 // Single-file React app. Uses SVG for both the molecule view and the UV-Vis spectrum.
@@ -328,6 +329,15 @@ export default function App() {
           </div>
           <HomoLumoPanel lambda={lambdaMax} />
           <SpectrumChart n={n} />
+        </section>
+
+        {/* β-Carotene section */}
+        <section className="rounded-2xl bg-white shadow p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-medium">β-Carotene Conjugation</h2>
+            <span className="text-xs text-slate-500">From polyenes to carotenoids</span>
+          </div>
+          <BetaCaroteneConjugation />
         </section>
 
         {/* Closing line */}
