@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import BetaCaroteneConjugation from "./BetaCaroteneConjugation"; // <-- exact casing
 
 // Interactive Conjugated Alkene Spectrometer
@@ -280,6 +280,18 @@ export default function App() {
   const [n, setN] = useState(4); // number of conjugated double bonds
   const lambdaMax = useMemo(() => lambdaMaxFromN(n), [n]);
 
+  // Minimal runtime checks in console (sanity tests)
+  useEffect(() => {
+    try {
+      var ok1 = (lambdaMaxFromN(2) < lambdaMaxFromN(6));
+      console.assert(ok1, 'Test: lambdaMaxFromN should red-shift with n');
+      var e1 = eVfromNm(620).toFixed(2); var e2 = eVfromNm(310).toFixed(2);
+      console.assert(Number(e1) < Number(e2), 'Test: photon energy decreases with wavelength');
+      var prod = Number(eVfromNm(500).toFixed(2)) * 500;
+      console.assert(Math.abs(prod - 1240) < 10, 'Test: eVfromNm*lambda ≈ 1240');
+    } catch (e) {}
+  }, []);
+
   return (
     <div className="min-h-screen w-full bg-slate-50 text-slate-900">
       <main className="mx-auto max-w-3xl px-4 py-10 space-y-6">
@@ -345,20 +357,6 @@ export default function App() {
           The growing π-conjugation narrows the HOMO–LUMO gap, decreasing transition energy and shifting absorption into the visible — linking structure to color.
         </p>
       </main>
-
-      {/* Minimal runtime checks in console (sanity tests) */}
-      <script suppressHydrationWarning>{`
-        (function(){
-          try {
-            var ok1 = (${lambdaMaxFromN(2)} < ${lambdaMaxFromN(6)});
-            console.assert(ok1, 'Test: lambdaMaxFromN should red-shift with n');
-            var e1 = ${eVfromNm(620).toFixed(2)}; var e2 = ${eVfromNm(310).toFixed(2)};
-            console.assert(e1 < e2, 'Test: photon energy decreases with wavelength');
-            var prod = ${eVfromNm(500).toFixed(2)} * 500;
-            console.assert(Math.abs(prod - 1240) < 10, 'Test: eVfromNm*lambda ≈ 1240');
-          } catch (e) {}
-        })();
-      `}</script>
     </div>
   );
 }
