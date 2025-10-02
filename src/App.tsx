@@ -291,9 +291,9 @@ export default function App() {
 
         {/* Intro text */}
         <section className="space-y-4 leading-relaxed">
-          <p>Your phone screen lights up, but a grocery bag doesn't. Both are plastics!</p>
+          <p>What makes organic compounds like sugar and flour colorless, while pigments like chlorophyll and carotenoids create the rich greens of growing plants and the striking colors of autumn?</p>
           <p>
-            Increasing the length of the conjugated π-system lowers the HOMO–LUMO gap,
+            Increasing the length of the conjugated π-system lowers the HOMO–LUMO ggit ap,
             shifting λ<sub>max</sub> to longer wavelength (lower energy).
           </p>
         </section>
