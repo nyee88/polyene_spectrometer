@@ -22,11 +22,27 @@ export default function App() {
             In this lesson, we'll explore how certain features of organic molecules can create vivid colors and allow them to carry electrical charge.
             <br />
             <br />
-            <strong>But first — a quick refresher on how we perceive color:</strong>
+            But first — a quick refresher on what determines the colors we perceive in everyday objects:
+            <br />
+            <br />
+            The color we perceive corresponds to the wavelength of light that reaches our eyes. Visible light spans wavelengths from about 400 nm (violet) to 700 nm (red) while
+            wavelengths outside this range (like ultraviolet and infrared rays from the sun) are invisible to us. Figure 1 shows the visible spectrum with approximate colors.
+            Things that emit light - think screens, lightbulbs, and fireflies - will appear the color of the wavelengths they emit. So something that emits 
           </p>
 
           {/* Wavelength diagram placed immediately after the sentence above */}
-          <WavelengthColor minNM={400} maxNM={700} tickStep={50} width={720} />
+          <WavelengthColor
+            minNM={350}
+            maxNM={750}
+            visibleMin={400}
+            visibleMax={700}
+            tickStep={50}
+            tickScope="visible"
+            width={720}
+          />
+          <p className="text-xs text-slate-600 mt-1">
+            <strong>Figure 1.</strong> The visible spectrum - perceived color vs. wavelength approximate.
+          </p>
 
           <p>
             Increasing the length of the conjugated π-system lowers the HOMO–LUMO gap,
