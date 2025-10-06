@@ -18,7 +18,9 @@ export default function App() {
             What makes some organic compounds like sugar and flour white,
             while chlorophyll and carotenoids create the rich greens of plants and the striking colors of autumn? And what does that have to do with building a solar cell?
             <br />
+            <br />
             In this lesson, we'll explore how certain features of organic molecules can create vivid colors and allow them to carry electrical charge.
+            <br />
             <br />
             <strong>But first — a quick refresher on how we perceive color:</strong>
           </p>
