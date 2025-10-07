@@ -13,7 +13,7 @@ export default function App() {
         </header>
 
         {/* Intro text */}
-        <section className="space-y-4 leading- text-justify">
+        <section className="space-y-4 leading- text-justify hyphens-auto">
           <p>
             What makes some organic compounds like sugar and flour white,
             while chlorophyll and carotenoids create the rich greens of plants and the striking colors of autumn? And what does that have to do with building a solar cell?
@@ -47,8 +47,17 @@ export default function App() {
           <p>
             Figure 1 shows the visible spectrum and the colors associated with each wavelength. 
             Things that emit light – think screens, lightbulbs, and fireflies – will appear the color associated with wavelengths they emit.
-            So a pixel on an OLED TV that emits light at around 450 nm will appear blue. If it emits light around 650 nm it will appear red. The wavelength of light emitted is the same as the wavelength of light that reaches your eyes.
-            Simple enough.
+            So a pixel on an OLED TV that emits light at 450 nm will appear blue. If it emits at 650 nm it will appear red. 
+            The wavelength of light emitted is what reaches our eyes – simple enough. 
+            But what about objects that don't emit light, like a red apple or green leaf, or most everyday things we see?
+            In such cases, it is still true that the color we perceive is determined by the wavelength of light that reaches our eyes.
+            The difference is that the source of the light is external (like the sun or a light bulb). Objects absorb certain wavelengths 
+            of light and reflect or transmit others. Objects that reflect all wavelengths appear white, 
+            ones that absorb all wavelengths appear black, and ones that transmit all wavelengths of light (e.g. water) appear transparent.
+            Colored objects absorb some wavelengths and reflect others. A red apple appears red because it absorbs most
+            wavelengths of visible light <em>except</em> those corresponding to red (~650 nm), which is reflected and what reaches our eyes. 
+            A green leaf appears green because it absorbs most wavelengths <em>except</em> those corresponding to green (~550 nm). Later we'll look 
+            at how the structure of organic molecules determines which wavelengths get absorbed and which ones we see. 
 
             <br />
             <br />
