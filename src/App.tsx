@@ -13,7 +13,7 @@ export default function App() {
         </header>
 
         {/* Intro text */}
-        <section className="space-y-4 leading-relaxed">
+        <section className="space-y-4 leading- text-justify">
           <p>
             What makes some organic compounds like sugar and flour white,
             while chlorophyll and carotenoids create the rich greens of plants and the striking colors of autumn? And what does that have to do with building a solar cell?
@@ -22,12 +22,12 @@ export default function App() {
             In this lesson, we'll explore how certain features of organic molecules can create vivid colors and allow them to carry electrical charge.
             <br />
             <br />
-            But first — a quick refresher on what determines the colors we perceive in everyday objects:
+            But first – a quick refresher on what determines the colors we perceive in everyday objects:
             <br />
             <br />
-            The color we perceive corresponds to the wavelength of light that reaches our eyes. Visible light spans wavelengths from about 400 nm (violet) to 700 nm (red) while
-            wavelengths outside this range (like ultraviolet and infrared rays from the sun) are invisible to us. Figure 1 shows the visible spectrum with approximate colors.
-            Things that emit light - think screens, lightbulbs, and fireflies - will appear the color of the wavelengths they emit. So something that emits 
+            The color we perceive corresponds to the wavelength of light that reaches our eyes. Visible light spans wavelengths 
+            from about 400 nm (violet) to 700 nm (red) while wavelengths outside this range (like ultraviolet and infrared rays 
+            from the sun) are invisible to us. 
           </p>
 
           {/* Wavelength diagram placed immediately after the sentence above */}
@@ -41,10 +41,17 @@ export default function App() {
             width={720}
           />
           <p className="text-xs text-slate-600 mt-1">
-            <strong>Figure 1.</strong> The visible spectrum - perceived color vs. wavelength approximate.
+            <strong>Figure 1.</strong> The visible spectrum - perceived color vs. wavelength (approximate).
           </p>
 
           <p>
+            Figure 1 shows the visible spectrum and the colors associated with each wavelength. 
+            Things that emit light – think screens, lightbulbs, and fireflies – will appear the color associated with wavelengths they emit.
+            So a pixel on an OLED TV that emits light at around 450 nm will appear blue. If it emits light around 650 nm it will appear red. The wavelength of light emitted is the same as the wavelength of light that reaches your eyes.
+            Simple enough.
+
+            <br />
+            <br />
             Increasing the length of the conjugated π-system lowers the HOMO–LUMO gap,
             shifting λ<sub>max</sub> to longer wavelength (lower energy).
           </p>
