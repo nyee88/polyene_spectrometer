@@ -1,6 +1,7 @@
 // src/App.tsx
 import BetaCaroteneConjugation from "./BetaCaroteneConjugation";
 import WavelengthColor from "./components/WavelengthColor";
+import AbsorptionExplorer from "./components/AbsorptionExplorer";
 
 export default function App() {
   return (
@@ -51,26 +52,32 @@ export default function App() {
             <br />
             <br />
             The wavelength of light emitted is what reaches our eyes – simple enough. 
+            But what about most everyday objects that don't emit light, like a red apple or green leaf?       
             <br />
             <br />
-            But what about objects that don't emit light, like a red apple or green leaf, or most everyday things we see?
+            In such cases, the color we perceive is still determined by the wavelength of light that reaches our eyes. It's just that it's 
+            journey is different. The difference is that the light first comes from an external source (like the sun or a light bulb)
+            and then reflects back to your eyes. Only those wavelengths that are not absorbed or transmitted are reflected back to your eyes. 
             <br />
             <br />
-            In such cases, it is still true that the color we perceive is determined by the wavelength of light that reaches our eyes.
-            The difference is that the source of the light is external (like the sun or a light bulb). Objects absorb certain wavelengths 
-            of light and reflect or transmit others. Objects that reflect all wavelengths appear white, 
-            ones that absorb all wavelengths appear black, and ones that transmit all wavelengths of light (e.g. water) appear transparent.
+            Objects that reflect all wavelengths look white, 
+            ones that absorb all wavelengths look black, and ones that transmit all wavelengths of light (e.g. water) look transparent.
             <br />
             <br />
             Colored objects absorb some wavelengths and reflect others. A red apple appears red because it absorbs most
-            wavelengths of visible light <em>except</em> those corresponding to red (~650 nm), which is reflected and what reaches our eyes. 
-            A green leaf appears green because it absorbs most wavelengths <em>except</em> those corresponding to green (~550 nm). 
+            wavelengths of visible light <em>except</em> those corresponding to red (in the ~650 nm region), which is reflected and what reaches our eyes. 
+            A green leaf appears green because it absorbs most wavelengths <em>except</em> those corresponding to green (in the ~550 nm region). 
             <br />
             <br />
             Later we'll look at how the structure of organic molecules determines which wavelengths get absorbed and which ones we see. 
+            <br />
+            <br />
+            To get a better feel for this, the interactive tool below shows the visible spectrum again, 
+            with adjustable absorption bands so you can see how shifting them changes the color we perceive.
 
-            <br />
-            <br />
+            {/* Absorption Explorer goes here */}
+            <AbsorptionExplorer width={720} />  
+
             Increasing the length of the conjugated π-system lowers the HOMO–LUMO gap,
             shifting λ<sub>max</sub> to longer wavelength (lower energy).
           </p>
