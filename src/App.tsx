@@ -81,7 +81,8 @@ export default function App() {
 
           <p>
             But what determines the position of the absorption bands? 
-
+            <br />
+            <br />
             It depends on which wavelengths of light are absorbed by the outermost electrons in a molecule. When a photon with just the right energy hits the molecule, 
             an electron can absorb it and jump to a higher level.  
             <br />
