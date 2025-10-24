@@ -324,8 +324,7 @@ function WavelengthColor({
   fontSize = 12,
   className,
   showUVIR = true,
-  labelUV = "UV",
-  labelIR = "IR",
+ 
 }: WavelengthColorProps) {
   const nmMin = Math.min(minNM, maxNM);
   const nmMax = Math.max(minNM, maxNM);

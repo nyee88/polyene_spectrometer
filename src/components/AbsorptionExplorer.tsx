@@ -90,8 +90,7 @@ function WavelengthColor({
   fontSize = 12,
   className,
   showUVIR = true,
-  labelUV = "UV",
-  labelIR = "IR",
+
 }: WavelengthColorProps) {
   const nmMin = Math.min(minNM, maxNM);
   const nmMax = Math.max(minNM, maxNM);
@@ -102,7 +101,6 @@ function WavelengthColor({
   const titleH = title ? 22 : 0;
   const innerW = width - pad * 2;
   const barY = pad + titleH;
-  const axisY = barY + barHeight;
   const axisGapBelow = 12;
   const svgHeight = pad + titleH + barHeight + axisGapBelow + pad;
 
