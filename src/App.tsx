@@ -83,13 +83,18 @@ export default function App() {
             But what determines the position of the absorption bands? 
 
             It depends on which wavelengths of light are absorbed by the outermost electrons in a molecule. When a photon with just the right energy hits the molecule, 
-            an electron can absorb it and jump to a higher level.  If the photon’s energy doesn’t match the gap, 
+            an electron can absorb it and jump to a higher level.  
+            <br />
+            <br />
+            If the photon’s energy doesn’t match the gap, 
             it passes through or reflects off. This is why only certain wavelengths are absorbed. 
+            <br />
+            <br />
             You can think of it like resonance: a swing only builds momentum when pushed at the right rhythm.
             A tuning fork vibrates when it’s hit with sound at a very specific frequency
             Similarly, a molecule only absorbs light at the frequencies that match its energy gaps.
-            The rest of the light continues on, and that leftover mix is what gives the molecule its color.
-
+            <br />
+            <br />
             In the demonstration below, you can drag the highest occupied molecular orbital (HOMO - this is where the most energetic electrons reside)
             and the lowest unoccupied molecular orbital (LUMO - this is where the electrons in the HOMO jump to once it absorbs photons with matching energy) 
             and see how the absorption spectrum changes.
