@@ -24,17 +24,15 @@ type WavelengthColorProps = {
   labelIR?: string;
 };
 
-function clamp(v: number, lo: number, hi: number) {
-  return Math.max(lo, Math.min(hi, v));
-}
-function ticks(minNM: number, maxNM: number, step: number): number[] {
+const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
+const ticks = (minNM: number, maxNM: number, step: number): number[] => {
   const start = Math.ceil(minNM / step) * step;
   const out: number[] = [];
   for (let t = start; t <= maxNM; t += step) out.push(t);
   if (out[0] !== minNM) out.unshift(minNM);
   if (out[out.length - 1] !== maxNM) out.push(maxNM);
   return out;
-}
+};
 function wavelengthToSRGB(nm: number): { r: number; g: number; b: number } {
   let r = 0, g = 0, b = 0, factor = 0;
   if (nm >= 380 && nm < 440) { r = -(nm - 440) / 60; g = 0; b = 1; }
@@ -59,6 +57,21 @@ const nmToColor = (nm: number) => {
   const { r, g, b } = wavelengthToSRGB(nm);
   return rgbToHex(r, g, b);
 };
+
+// label culling (keep ticks, hide overlapping labels)
+function cullTicksBySpacing(
+  ticksArr: number[],
+  toX: (nm: number) => number,
+  minDx: number
+) {
+  const out: number[] = [];
+  let last = -Infinity;
+  for (const t of ticksArr) {
+    const x = toX(t);
+    if (x - last >= minDx) { out.push(t); last = x; }
+  }
+  return out;
+}
 
 function WavelengthColor({
   minNM = 350,
@@ -119,6 +132,17 @@ function WavelengthColor({
     stops.push({ offset: off, color: nmToColor(nm) });
   }
 
+  // compute labels to show
+  const labelMinDx = 44;
+  const labelToX = (t: number) => {
+    const left = tickScope === "full" ? fullTickLeft : visTickLeft;
+    const right = tickScope === "full" ? fullTickRight : visTickRight;
+    const min = tickScope === "full" ? minNM : visMin;
+    const max = tickScope === "full" ? maxNM : visMax;
+    return left + ((t - min) / (max - min)) * (right - left);
+  };
+  const labeledTicks = cullTicksBySpacing(tickVals, labelToX, labelMinDx);
+
   return (
     <figure className={className} aria-label="Wavelength bar with UV, visible, and IR regions">
       <svg
@@ -159,32 +183,22 @@ function WavelengthColor({
           )}
         </g>
 
-        {showUVIR && xVis0 > xUV0 && (
-          <text x={(xUV0 + xVis0) / 2} y={barY + barHeight / 2 + 4} textAnchor="middle" fontFamily={fontFamily} fontSize={fontSize} fill="#374151" opacity={0.9}>
-            {labelUV}
-          </text>
-        )}
-        {showUVIR && xIR1 > xVis1 && (
-          <text x={(xVis1 + xIR1) / 2} y={barY + barHeight / 2 + 4} textAnchor="middle" fontFamily={fontFamily} fontSize={fontSize} fill="#374151" opacity={0.9}>
-            {labelIR}
-          </text>
-        )}
-
+        {/* tick marks */}
         {tickVals.map((t) => {
           const left = tickScope === "full" ? fullTickLeft : visTickLeft;
           const right = tickScope === "full" ? fullTickRight : visTickRight;
           const min = tickScope === "full" ? minNM : visMin;
           const max = tickScope === "full" ? maxNM : visMax;
           const x = left + ((t - min) / (max - min)) * (right - left);
-          return (
-            <g key={t}>
-              <line x1={x} x2={x} y1={axisY} y2={axisY + 6} stroke="#111827" strokeWidth={1} />
-              <text x={x} y={axisY + 18} fontFamily={fontFamily} fontSize={fontSize} textAnchor="middle" fill="#111827">
-                {t} nm
-              </text>
-            </g>
-          );
+          return <line key={`tick-${t}`} x1={x} x2={x} y1={barY + barHeight} y2={barY + barHeight + 6} stroke="#111827" strokeWidth={1} />;
         })}
+
+        {/* labels (culled) */}
+        {labeledTicks.map((t) => (
+          <text key={`label-${t}`} x={labelToX(t)} y={barY + barHeight + 18} fontFamily={fontFamily} fontSize={fontSize} textAnchor="middle" fill="#111827">
+            {t} nm
+          </text>
+        ))}
       </svg>
 
       {caption ? <figcaption className="mt-1">{caption}</figcaption> : null}
@@ -210,7 +224,6 @@ function interp1(xArr: number[], yArr: number[], x: number): number {
   const t = (x - x0) / (x1 - x0);
   return y0 + t * (y1 - y0);
 }
-
 function integrateXYZ(visibleMin: number, visibleMax: number, T: (nm: number) => number) {
   const step = 5;
   let X = 0, Y = 0, Z = 0, Xw = 0, Yw = 0, Zw = 0;
@@ -229,7 +242,6 @@ function integrateXYZ(visibleMin: number, visibleMax: number, T: (nm: number) =>
   }
   return { X, Y, Z };
 }
-
 function xyzToLinearSRGB(X: number, Y: number, Z: number) {
   const r =  3.2406 * X + -1.5372 * Y + -0.4986 * Z;
   const g = -0.9689 * X +  1.8758 * Y +  0.0415 * Z;
@@ -262,7 +274,7 @@ function AbsorptionSpectrum({
   const toNM = (x: number) => nmMin + ((x - padding) / innerW) * (nmMax - nmMin);
 
   const sigmaA = React.useMemo(() => (fwhmA > 0 ? fwhmA / (2 * Math.sqrt(2 * Math.log(2))) : 1), [fwhmA]);
-  const sigmaB = React.useMemo(() => (fwhmB > 0 ? fwhmB / (2 * Math.sqrt(2 * Math.log(2))) : 1), [fwhmB]);
+  const sigmaB = React.useMemo(() => (twoPeaks && fwhmB > 0 ? fwhmB / (2 * Math.sqrt(2 * Math.log(2))) : 1), [twoPeaks, fwhmB]);
   const gA = (nm: number) => Math.exp(-0.5 * Math.pow((nm - centerA) / sigmaA, 2));
   const gB = (nm: number) => Math.exp(-0.5 * Math.pow((nm - centerB) / sigmaB, 2));
 
@@ -399,9 +411,9 @@ function AbsorptionSpectrum({
 }
 
 /* =============================================================================
-   AbsorptionExplorer (stateful parent)
+   AbsorptionExplorer (stateful parent) — DEFAULT EXPORT (single!)
    ========================================================================== */
-function AbsorptionExplorer({
+export default function AbsorptionExplorer({
   minNM = 350, maxNM = 750, visibleMin = 400, visibleMax = 700, width = 720, padding = 16,
 }: {
   minNM?: number; maxNM?: number; visibleMin?: number; visibleMax?: number; width?: number; padding?: number;
@@ -465,5 +477,3 @@ function AbsorptionExplorer({
     </div>
   );
 }
-
-export default AbsorptionExplorer;
