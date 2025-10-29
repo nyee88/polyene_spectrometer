@@ -1,7 +1,9 @@
 import BetaCaroteneConjugation from "./BetaCaroteneConjugation";
 import WavelengthColor from "./components/WavelengthColor";
 import AbsorptionExplorer from "./components/AbsorptionExplorer";
-import HomoLumoAbsorption from "./components/HomoLumoAbsorption"; // ← NEW
+import HomoLumoAbsorption from "./components/HomoLumoAbsorption";
+// NEW:
+import OrbitalSplitting from "./components/OrbitalSplitting";
 
 export default function App() {
   return (
@@ -103,6 +105,15 @@ export default function App() {
 
           {/* ← INSERTED: HOMO–LUMO + linked absorption */}
           <HomoLumoAbsorption width={720} />
+        </section>
+
+        {/* NEW: Orbital splitting game (between HomoLumoAbsorption and β-carotene) */}
+        <section className="rounded-2xl bg-white shadow p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-medium">π/π* Phase Match</h2>
+            <span className="text-xs text-slate-500">Click to set phase; unlock the ladder</span>
+          </div>
+          <OrbitalSplitting width={720} height={320} />
         </section>
 
         {/* β-Carotene section (kept) */}
