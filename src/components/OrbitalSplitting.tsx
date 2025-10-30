@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
  * OrbitalSplitting.tsx — SIMPLE, CLEAN, TESTED
  *
  * Four p orbitals in a row. Click anywhere on an orbital to toggle its phase:
- *   unset → top in‑phase (white) → bottom in‑phase (white).
+ *   unset → top in-phase (white) → bottom in-phase (white).
  * After the first click, a site never returns to unset via toggle (it flips between top and bottom).
  * When the global pattern matches a valid MO phase pattern for N=4,
  * that energy level is revealed on the ladder with a short animation, and a
@@ -19,8 +19,8 @@ import { motion, AnimatePresence } from "framer-motion";
  */
 
 export type OrbitalSplittingProps = {
-  width?: number;   // ladder SVG width
-  height?: number;  // ladder SVG height
+  width?: number;   // ladder SVG width (viewBox width)
+  height?: number;  // ladder SVG height (viewBox height)
 };
 
 const N = 4; // fixed to four orbitals (butadiene-like)
@@ -112,7 +112,11 @@ export default function OrbitalSplitting({ width = 360, height = 300 }: OrbitalS
     const stroke = "#111827"; // gray-900 outline
 
     return (
-      <svg width={W} height={H} className="w-full">
+      <svg
+        viewBox={`0 0 ${W} ${H}`}
+        preserveAspectRatio="xMidYMid meet"
+        className="w-full h-auto block"
+      >
         {/* backbone line (nodal plane) */}
         <line x1={margin - 20} x2={W - margin + 20} y1={y0} y2={y0} stroke="#cbd5e1" strokeWidth={1} pointerEvents="none" />
 
@@ -164,14 +168,14 @@ export default function OrbitalSplitting({ width = 360, height = 300 }: OrbitalS
   const RUNG_LEFT = 60;     // px, left x for rung
 
   return (
-    <div className="w-full flex flex-col gap-4">
+    <div className="w-full flex flex-col gap-4 p-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-semibold">π/π* Phase Match (4 orbitals)</h2>
         <button onClick={reset} className="px-3 py-1.5 rounded-xl bg-slate-800 text-white text-sm hover:bg-slate-900">Reset</button>
       </div>
 
       {/* Side-by-side: Orbitals (left) | Ladder (right) */}
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Orbital picker (nice-looking lobes) */}
         <div className="rounded-2xl shadow p-4 bg-white border border-slate-200">
           <div className="text-lg font-medium">Click lobes to set phase</div>
@@ -211,7 +215,11 @@ export default function OrbitalSplitting({ width = 360, height = 300 }: OrbitalS
             <div className="text-xs text-slate-500">rungs appear when unlocked</div>
           </div>
 
-          <svg width={width} height={height} className="mt-3 w-full">
+          <svg
+            viewBox={`0 0 ${width} ${height}`}
+            preserveAspectRatio="xMidYMid meet"
+            className="mt-3 w-full h-auto block"
+          >
             {/* axis */}
             <line x1={48} x2={48} y1={12} y2={height - 12} stroke="#64748b" strokeWidth={1} />
             <text x={16} y={16} className="fill-slate-600 text-[10px]">E</text>

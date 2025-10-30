@@ -18,8 +18,8 @@ export default function App() {
         {/* Intro text */}
         <section className="space-y-4 leading-relaxed text-justify hyphens-auto">
           <p>
-            What makes some organic compounds like sugar and flour white,
-            while chlorophyll and carotenoids create the rich greens of plants and the striking colors of autumn? And what does that have to do with building a solar cell?
+            Why are some organic compounds like sugar and flour white,
+            while others like chlorophyll and carotenoids create the rich greens of plants and the striking colors of autumn? And what does that have to do with building a solar cell?
             <br />
             <br />
             In this lesson, we'll explore how certain features of organic molecules can create vivid colors and allow them to carry electrical charge.
@@ -106,6 +106,39 @@ export default function App() {
           {/* ← INSERTED: HOMO–LUMO + linked absorption */}
           <HomoLumoAbsorption width={720} />
         </section>
+
+        <section className="mt-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+  <p className="text-slate-800 font-medium">What did you notice?</p>
+  <p className="mt-2 text-slate-700">
+    As you narrowed the gap between the HOMO and LUMO on the slider, how did the
+    absorption wavelength change?
+  </p>
+
+  {/* Reveal answer */}
+  <details className="mt-3">
+    <summary className="cursor-pointer text-slate-700 font-medium">
+      Show the pattern I should see
+    </summary>
+    <div className="mt-2 space-y-2 text-slate-700">
+      <p>
+        The absorption wavelength gets <em>longer</em> when the energy gap gets
+        <em> smaller</em>. That’s because photon energy and wavelength are inversely related:
+        <span className="whitespace-nowrap"> E = hν = hc/λ, </span>
+        so <span className="whitespace-nowrap">λ ∝ 1/E</span>. 
+        (Quick check: <span className="whitespace-nowrap">λ(nm) ≈ 1240 / E(eV)</span>.)
+      </p>
+      <ul className="list-disc pl-6 text-slate-700 text-sm">
+        <li>Big gap → high-energy photons → shorter λ (violet/UV).</li>
+        <li>Small gap → lower-energy photons → longer λ (red/NIR).</li>
+      </ul>
+      <p className="text-slate-700">
+        Next question: <strong>what molecular features shrink that gap?</strong>
+        Let’s start with a single double bond.
+      </p>
+    </div>
+  </details>
+</section>
+
 
         {/* NEW: Orbital splitting game (between HomoLumoAbsorption and β-carotene) */}
         <section className="rounded-2xl bg-white shadow p-4 space-y-3">
