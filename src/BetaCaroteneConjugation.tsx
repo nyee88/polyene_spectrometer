@@ -205,7 +205,8 @@ export default function BetaCaroteneConjugation() {
     setSelected(prev => {
       pushHistory(prev);
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
       return next;
     });
   }
@@ -273,7 +274,7 @@ export default function BetaCaroteneConjugation() {
         </div>
       </div>
 
-      <svg viewBox={`0 0 ${width} ${height}`} style={{ width: "100%,", height: "auto", background: "#fff", borderRadius: 12, boxShadow: "0 1px 6px rgba(0,0,0,.08)" }} role="img" aria-label="Beta carotene conjugation explorer">
+      <svg viewBox={`0 0 ${width} ${height}`} style={{ width: "100%", height: "auto", background: "#fff", borderRadius: 12, boxShadow: "0 1px 6px rgba(0,0,0,.08)" }} role="img" aria-label="Beta carotene conjugation explorer">
         <rect x={0} y={0} width={width} height={height} fill="#ffffff" rx={12} />
         <g strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2}>
           {edges.map((e) => {

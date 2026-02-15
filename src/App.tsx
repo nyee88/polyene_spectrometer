@@ -138,7 +138,29 @@ export default function App() {
     </div>
   </details>
 </section>
+  
+      <p>
+            So now we've seen how the visible absorption spectrum of a molecule depends on the energy gap 
+            between its HOMO and LUMO orbitals (HOMO-LUMO gap). Keep in mind, in reality there are many absorption bands 
+            present due to various electronic transitions, but the color of most organic compounds are largely determined 
+            by one or two main absorption bands, with the lowest energy (highest wavelength) band corresponding to the
+            HOMO-LUMO transition.
 
+            <br />
+            <br />
+            But which features of organic molecules result in an energy gap in the visible range?
+             Before answering this question we need to do another quick refresher - this time about molecular orbitals. 
+            <br />
+            <br />
+            - Most carbon atoms in organic molecules are sp<sup>3</sup> hybridized, 
+            meaning one s orbital and three p orbitals hybridize to form four sp<sup>3</sup> orbitals. 
+            These orbitals form four equal σ bonds. Most single (σ) bonds such as C-C and C-H bonds have energy gaps 
+            in the deep UV range. Light in the visible spectrum (400-700 nm) 
+            is not energetic enough to excite the electrons in the sigma bonds. 
+            This is why the majority of organic compounds, which consist mostly of σ bonds, are colorless. This is why water (only O-H bonds) is colorless, and why simple alcohols (e.g. methanol, ethanol, isopropanol) which contain only C-H, C-O, and O-H bonds, are colorless. 
+            
+      </p>
+  
 
         {/* NEW: Orbital splitting game (between HomoLumoAbsorption and β-carotene) */}
         <section className="rounded-2xl bg-white shadow p-4 space-y-3">

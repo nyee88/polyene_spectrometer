@@ -224,7 +224,7 @@ function interp1(xArr: number[], yArr: number[], x: number): number {
 }
 function integrateXYZ(visibleMin: number, visibleMax: number, T: (nm: number) => number) {
   const step = 5;
-  let X = 0, Y = 0, Z = 0, Xw = 0, Yw = 0, Zw = 0;
+  let X = 0, Y = 0, Z = 0, Yw = 0;
   for (let nm = visibleMin; nm <= visibleMax; nm += step) {
     const s = interp1(WL, D65, nm);
     const xbar = interp1(WL, CMF_X, nm);
@@ -232,7 +232,7 @@ function integrateXYZ(visibleMin: number, visibleMax: number, T: (nm: number) =>
     const zbar = interp1(WL, CMF_Z, nm);
     const t = T(nm);
     X += s * t * xbar; Y += s * t * ybar; Z += s * t * zbar;
-    Xw += s * xbar; Yw += s * ybar; Zw += s * zbar;
+    Yw += s * ybar;
   }
   if (Yw > 0) {
     const k = 1 / Yw;
@@ -268,20 +268,23 @@ function AbsorptionSpectrum({
   const nmMax = Math.max(minNM, maxNM);
   const innerW = width - padding * 2;
 
-  const toX = (nm: number) => padding + ((nm - nmMin) / (nmMax - nmMin)) * innerW;
+  const toX = React.useCallback(
+    (nm: number) => padding + ((nm - nmMin) / (nmMax - nmMin)) * innerW,
+    [innerW, nmMax, nmMin, padding]
+  );
   const toNM = (x: number) => nmMin + ((x - padding) / innerW) * (nmMax - nmMin);
 
   const sigmaA = React.useMemo(() => (fwhmA > 0 ? fwhmA / (2 * Math.sqrt(2 * Math.log(2))) : 1), [fwhmA]);
   const sigmaB = React.useMemo(() => (twoPeaks && fwhmB > 0 ? fwhmB / (2 * Math.sqrt(2 * Math.log(2))) : 1), [twoPeaks, fwhmB]);
-  const gA = (nm: number) => Math.exp(-0.5 * Math.pow((nm - centerA) / sigmaA, 2));
-  const gB = (nm: number) => Math.exp(-0.5 * Math.pow((nm - centerB) / sigmaB, 2));
+  const gA = React.useCallback((nm: number) => Math.exp(-0.5 * Math.pow((nm - centerA) / sigmaA, 2)), [centerA, sigmaA]);
+  const gB = React.useCallback((nm: number) => Math.exp(-0.5 * Math.pow((nm - centerB) / sigmaB, 2)), [centerB, sigmaB]);
 
   const peakH = 64;
   const peakBaseY = peakH;
   const svgRef = React.useRef<SVGSVGElement | null>(null);
 
   const scale = (a0:number) => Math.min(1, Math.max(0, a0 / 2));
-  const pathFor = (g: (nm:number)=>number, sc:number) => {
+  const pathFor = React.useCallback((g: (nm:number)=>number, sc:number) => {
     const step = 2;
     let d = `M ${toX(nmMin)} ${peakBaseY}`;
     for (let nm = nmMin; nm <= nmMax; nm += step) {
@@ -291,10 +294,10 @@ function AbsorptionSpectrum({
     }
     d += ` L ${toX(nmMax)} ${peakBaseY} Z`;
     return d;
-  };
+  }, [nmMax, nmMin, peakBaseY, peakH, toX]);
 
-  const pathA = React.useMemo(() => pathFor(gA, scale(a0A)), [centerA, sigmaA, a0A]);
-  const pathB = React.useMemo(() => (twoPeaks ? pathFor(gB, scale(a0B)) : ""), [twoPeaks, centerB, sigmaB, a0B]);
+  const pathA = React.useMemo(() => pathFor(gA, scale(a0A)), [a0A, gA, pathFor]);
+  const pathB = React.useMemo(() => (twoPeaks ? pathFor(gB, scale(a0B)) : ""), [a0B, gB, pathFor, twoPeaks]);
 
   // Perceived color via D65 + CMFs + Beer–Lambert; slight saturation lift for legibility
   const perceivedHex = React.useMemo(() => {
@@ -338,7 +341,7 @@ function AbsorptionSpectrum({
     const R = compand(r), G = compand(g), B = compand(b);
     const toHex = (v:number)=> Math.round(Math.min(255, Math.max(0, v*255))).toString(16).padStart(2,'0');
     return `#${toHex(R)}${toHex(G)}${toHex(B)}`;
-  }, [centerA, fwhmA, a0A, twoPeaks, centerB, fwhmB, a0B, visibleMin, visibleMax]);
+  }, [a0A, a0B, gA, gB, twoPeaks, visibleMin, visibleMax]);
 
   // Drag to move the nearest peak
   const [dragging, setDragging] = React.useState(false);

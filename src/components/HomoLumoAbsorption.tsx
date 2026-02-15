@@ -36,7 +36,6 @@ function cullTicksBySpacing(
 
 export default function HomoLumoAbsorption({
   width = 720,
-  height = 380,
   className,
   initialGapEV = 3.24, // ~496 nm
   minGapEV = 1.4, // ~885 nm (IR)
@@ -51,7 +50,6 @@ export default function HomoLumoAbsorption({
   ),
 }: {
   width?: number;
-  height?: number;
   className?: string;
   initialGapEV?: number;
   minGapEV?: number;
@@ -301,13 +299,16 @@ function AbsorptionMini({
   const nmMin = Math.min(minNM, maxNM);
   const nmMax = Math.max(minNM, maxNM);
   const innerW = width - padding * 2;
-  const toX = (nm: number) => padding + ((nm - nmMin) / (nmMax - nmMin)) * innerW;
+  const toX = React.useCallback(
+    (nm: number) => padding + ((nm - nmMin) / (nmMax - nmMin)) * innerW,
+    [innerW, nmMax, nmMin, padding]
+  );
 
   const sigma = React.useMemo(
     () => (fwhmNM > 0 ? fwhmNM / (2 * Math.sqrt(2 * Math.log(2))) : 1),
     [fwhmNM]
   );
-  const g = (nm: number) => Math.exp(-0.5 * Math.pow((nm - centerNM) / sigma, 2));
+  const g = React.useCallback((nm: number) => Math.exp(-0.5 * Math.pow((nm - centerNM) / sigma, 2)), [centerNM, sigma]);
   const peakH = 64;
   const peakBaseY = peakH;
 
@@ -323,7 +324,7 @@ function AbsorptionMini({
     }
     d += ` L ${toX(nmMax)} ${peakBaseY} Z`;
     return d;
-  }, [centerNM, sigma, peakA0]);
+  }, [g, nmMax, nmMin, peakA0, peakBaseY, peakH, toX]);
 
   // Perceived color via D65 + CMFs + Beer–Lambert
   const perceivedHex = React.useMemo(() => {
@@ -390,7 +391,7 @@ function AbsorptionMini({
       B = compand(b);
     const toHex = (v: number) => Math.round(Math.min(255, Math.max(0, v * 255))).toString(16).padStart(2, "0");
     return `#${toHex(R)}${toHex(G)}${toHex(B)}`;
-  }, [centerNM, sigma, peakA0, visibleMin, visibleMax]);
+  }, [peakA0, visibleMin, visibleMax, g]);
 
   return (
     <div className="w-full">
@@ -678,9 +679,7 @@ function integrateXYZ(visibleMin: number, visibleMax: number, T: (nm: number) =>
   let X = 0,
     Y = 0,
     Z = 0,
-    Xw = 0,
-    Yw = 0,
-    Zw = 0;
+    Yw = 0;
   for (let nm = visibleMin; nm <= visibleMax; nm += step) {
     const s = interp1(WL, D65, nm);
     const xbar = interp1(WL, CMF_X, nm);
@@ -690,9 +689,7 @@ function integrateXYZ(visibleMin: number, visibleMax: number, T: (nm: number) =>
     X += s * t * xbar;
     Y += s * t * ybar;
     Z += s * t * zbar;
-    Xw += s * xbar;
     Yw += s * ybar;
-    Zw += s * zbar;
   }
   if (Yw > 0) {
     const k = 1 / Yw;
@@ -716,7 +713,6 @@ function compand(v: number) {
  * Lightweight runtime checks (dev)
  * =============================== */
 (() => {
-  try {
     console.assert(clamp(5, 0, 4) === 4, "clamp upper bound");
     console.assert(clamp(-1, 0, 4) === 0, "clamp lower bound");
     console.assert(Math.round(eVToNm(2.48)) === 500, "eV→nm ~500 nm @ 2.48 eV");
@@ -728,5 +724,4 @@ function compand(v: number) {
     const identityX = (nm: number) => nm;
     const culled = cullTicksBySpacing(testTicks, identityX, 60);
     console.assert(culled.length < testTicks.length, "label culling drops some labels when crowded");
-  } catch {}
 })();

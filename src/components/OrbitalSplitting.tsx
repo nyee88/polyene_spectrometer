@@ -18,7 +18,7 @@ import { motion, AnimatePresence } from "framer-motion";
  *   k=4: + – + –      (highest, π4*)
  */
 
-export type OrbitalSplittingProps = {
+type OrbitalSplittingProps = {
   width?: number;   // ladder SVG width (viewBox width)
   height?: number;  // ladder SVG height (viewBox height)
 };
@@ -26,7 +26,7 @@ export type OrbitalSplittingProps = {
 const N = 4; // fixed to four orbitals (butadiene-like)
 
 // Hückel energies for N=4 with α = 0, β = -1 (only ordering/spacing matters)
-export function energiesN4(beta = -1): { k: number; E: number }[] {
+function energiesN4(beta = -1): { k: number; E: number }[] {
   const out = Array.from({ length: N }, (_, i) => {
     const k = i + 1;
     const E = 2 * beta * Math.cos((k * Math.PI) / (N + 1));
@@ -36,20 +36,20 @@ export function energiesN4(beta = -1): { k: number; E: number }[] {
 }
 
 // Canonical sign patterns for N=4 (overall sign doesn’t matter)
-export const CANON = new Map<number, number[]>([
+const CANON = new Map<number, number[]>([
   [1, [ 1,  1,  1,  1]],
   [2, [ 1,  1, -1, -1]],
   [3, [ 1, -1, -1,  1]],
   [4, [ 1, -1,  1, -1]],
 ]);
 
-export function sameUpToGlobalSign(a: number[], b: number[]): boolean {
+function sameUpToGlobalSign(a: number[], b: number[]): boolean {
   const same = a.every((v, i) => v === b[i]);
   const neg  = a.every((v, i) => v === -b[i]);
   return same || neg;
 }
 
-export function matchLevel(phases: number[]): number | null {
+function matchLevel(phases: number[]): number | null {
   if (phases.some((p) => p === 0)) return null; // require explicit choices first
   for (const [k, pat] of CANON) if (sameUpToGlobalSign(phases, pat)) return k;
   return null;
@@ -302,9 +302,8 @@ export default function OrbitalSplitting({ width = 360, height = 300 }: OrbitalS
    ------------------------ */
 // These simple assertions run in dev (Vite: import.meta.env.DEV) and help ensure
 // the phase-matching logic stays correct. They do not affect production.
-if (typeof import.meta !== "undefined" && (import.meta as any).env && (import.meta as any).env.DEV) {
+if (import.meta.env.DEV) {
   const expect = (name: string, cond: boolean) => {
-    // eslint-disable-next-line no-console
     console.assert(cond, `OrbitalSplitting self-test failed: ${name}`);
   };
   const t = (pattern: number[], expected: number | null) =>
